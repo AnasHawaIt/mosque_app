@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>تجربة الطلاب والحضور</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; direction: rtl; }
+    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+    th { background-color: #f2f2f2; }
+    input, button { padding: 5px; margin: 5px 0; }
+  </style>
+</head>
+<body>
+
+<h2>إضافة طالب جديد</h2>
+<input type="text" id="studentName" placeholder="اسم الطالب">
+<button onclick="addStudent()">إضافة</button>
+
+<h2>قائمة الطلاب</h2>
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>الاسم</th>
+      <th>إضافة حضور</th>
+      <th>حذف</th>
+    </tr>
+  </thead>
+  <tbody id="studentsTable"></tbody>
+</table>
+
+<h2>عرض الحضور حسب التاريخ</h2>
+<input type="date" id="attendanceDate">
+<button onclick="loadAttendance()">عرض</button>
+
+<table>
+  <thead>
+    <tr>
+      <th>اسم الطالب</th>
+      <th>تاريخ الحضور</th>
+    </tr>
+  </thead>
+  <tbody id="attendanceTable"></tbody>
+</table>
+
+<script>
+const API_BASE = "http://127.0.0.1:8000/api"; // رابط Laravel
+
+// ================== الطلاب ==================
+async function loadStudents() {
+  const res = await fetch(`${API_BASE}/s`);
+  const students = await res.json();
+  const table = document.getElementById('studentsTable');
+  table.innerHTML = '';
+  students.forEach(s => {
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${s.id}</td>
+      <td>${s.name}</td>
+      <td>
+        <input type="date" id="date-${s.id}">
+        <button onclick="addAttendance(${s.id})">تسجيل حضور</button>
+      </td>
+      <td><button onclick="deleteStudent(${s.id})">حذف</button></td>
+    `;
+    table.appendChild(row);
+  });
+}
+
+async function addStudent() {
+  const name = document.getElementById('studentName').value;
+  if (!name) return alert("ادخل اسم الطالب");
+  await fetch(`${API_BASE}/create`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name })
+  });
+  document.getElementById('studentName').value = '';
+  loadStudents();
+}
+
+async function deleteStudent(id) {
+  await fetch(`${API_BASE}/t/${id}`, { method: 'DELETE' });
+  loadStudents();
+}
+
+// ================== الحضور ==================
+async function addAttendance(studentId) {
+  const date = document.getElementById(`date-${studentId}`).value;
+  if (!date) return alert("اختر تاريخ");
+  await fetch(`${API_BASE}/createAttendance`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ student_id: studentId, date })
+  });
+  alert("تم تسجيل الحضور");
+  document.getElementById(`date-${studentId}`).value = '';
+}
+
+async function loadAttendance() {
+  const date = document.getElementById('attendanceDate').value;
+  if (!date) return alert("اختر التاريخ");
+  const res = await fetch(`${API_BASE}/ts/${date}`);
+  const attendances = await res.json();
+  const table = document.getElementById('attendanceTable');
+  table.innerHTML = '';
+  attendances.forEach(a => {
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${a.student.name}</td>
+      <td>${a.date}</td>
+    `;
+    table.appendChild(row);
+  });
+}
+
+// تحميل الطلاب عند فتح الصفحة
+loadStudents();
+</script>
+
+</body>
+</html>
