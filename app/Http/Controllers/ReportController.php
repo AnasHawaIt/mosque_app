@@ -37,6 +37,44 @@ class ReportController extends Controller
 
         return response()->json($data);
     }
+    
+    // تقرير يومي
+    public function dailyReport($date = null)
+    {
+        $date = $date ?? Carbon::today()->toDateString();
+
+        $halaqas = Halaqa::with(['students.attendances' => function($q) use ($date) {
+            $q->where('date', $date);
+        }])->get();
+
+        return view('reports.daily', compact('halaqas', 'date'));
+    }
+
+    // تقرير أسبوعي
+    public function weeklyReport($weekStart = null)
+    {
+        $weekStart = $weekStart ?? Carbon::now()->startOfWeek();
+        $weekEnd = (clone $weekStart)->endOfWeek();
+
+        $halaqas = Halaqa::with(['students.attendances' => function($q) use ($weekStart, $weekEnd){
+            $q->whereBetween('date', [$weekStart, $weekEnd]);
+        }])->get();
+
+        return view('reports.weekly', compact('halaqas', 'weekStart', 'weekEnd'));
+    }
+
+    // تقرير شهري
+    public function monthlyReport($month = null)
+    {
+        $month = $month ?? Carbon::now()->month;
+        $year = Carbon::now()->year;
+
+        $halaqas = Halaqa::with(['students.attendances' => function($q) use ($month, $year){
+            $q->whereMonth('date', $month)->whereYear('date', $year);
+        }])->get();
+
+        return view('reports.monthly', compact('halaqas', 'month', 'year'));
+    }
 
     // 🚨 الطلاب الأكثر غيابًا
     public function absentStudents()
