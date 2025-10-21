@@ -7,17 +7,11 @@ use Illuminate\Http\Request;
 
 class QuranInstructorController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
         return response()->json(Quran_instructor::all());
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $quran_instructor = Quran_instructor::create([
@@ -30,9 +24,6 @@ class QuranInstructorController extends Controller
         return response()->json($quran_instructor, 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show($id)
     {
         $quran_instructor = Quran_instructor::Find($id);
@@ -40,16 +31,10 @@ class QuranInstructorController extends Controller
         return $quran_instructor ? response()->json($quran_instructor) : response()->json(['message' => 'Not found'], 404);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(Quran_instructor $quran_instructor)
     {
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, $id)
     {
         $quran_instructor = Quran_instructor::Find($id);
