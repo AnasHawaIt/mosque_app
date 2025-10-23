@@ -16,7 +16,7 @@ class StudentController extends Controller
 
     public function store(RequestsRequestStudentStore $request)
     {
-        $student = Student::create($request->validate());
+        $student = Student::create($request->validated());
 
         return response()->json($student, 201);
     }
@@ -35,7 +35,7 @@ class StudentController extends Controller
         if (!$student) {
             return response()->json(['message' => 'Not found'], 404);
         }
-        $student->update($request->validate());
+        $student->update($request->validated());
 
         return response()->json($student);
     }

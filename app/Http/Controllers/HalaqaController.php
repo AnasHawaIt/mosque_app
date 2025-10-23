@@ -15,7 +15,7 @@ class HalaqaController extends Controller
 
     public function store(RequestHalaqaStore $request)
     {
-        $halaqa = Halaqa::create($request->validate());
+        $halaqa = Halaqa::create($request->validated());
 
         return response()->json(['message' => 'تم إنشاء الحلقة بنجاح', 'halaqa' => $halaqa]);
     }
@@ -23,7 +23,7 @@ class HalaqaController extends Controller
     public function update(RequestHalaqaUpdate $request, $id)
     {
         $halaqa = Halaqa::findOrFail($id);
-        $halaqa->update($request->validate());
+        $halaqa->update($request->validated());
         return response()->json(['message' => 'تم تعديل الحلقة بنجاح', 'halaqa' => $halaqa]);
     }
 
